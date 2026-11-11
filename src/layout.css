@@ -21,12 +21,10 @@
 .about-copy { min-width: 0; width: 100%; }
 .about-copy > p,
 .about-copy > .intro-copy { width: 100%; max-width: none; }
-.statement-inner { justify-content: flex-start; }
 .values-strip > .container { flex-wrap: wrap; row-gap: 10px; padding-block: 18px; }
 
 @media (max-width: 700px) {
   .about-grid { grid-template-columns: minmax(0, 1fr); gap: 40px; }
   .about-visual { margin: 0; }
-  .statement-inner { justify-content: normal; }
   .values-strip > .container { justify-content: center; column-gap: 15px; }
 }
