@@ -1,6 +1,6 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { ArrowUpRight, ArrowRight, ArrowDown, Menu, X, Plus, Minus, Heart, Sprout, Stethoscope, GraduationCap, BriefcaseBusiness, Check, MapPin, Pause, Play } from '@lucide/vue'
+import { ArrowUpRight, ArrowRight, ArrowDown, Menu, X, Plus, Minus, Heart, Sprout, Stethoscope, GraduationCap, BriefcaseBusiness, Check, MapPin } from '@lucide/vue'
 import InterestDialog from './components/InterestDialog.vue'
 
 const menuOpen = ref(false)
@@ -9,22 +9,10 @@ const selectedPriority = ref(0)
 const galleryIndex = ref(null)
 const galleryFilter = ref('All moments')
 const visiblePhotoCount = ref(3)
-const heroIndex = ref(0)
-const heroPlaying = ref(false)
-const heroHovered = ref(false)
-const heroFocused = ref(false)
 const openQuestion = ref(0)
 const activeSection = ref('home')
 const scrollProgress = ref(0)
 const galleryFilters = ['All moments', 'Community', 'Leadership']
-const heroSlides = [
-  { src: '/images/candidate-leadership.webp', width: 960, height: 640, alt: 'Arthur Amug Osiya addressing an indoor gathering from a lectern', title: 'The future starts', emphasis: 'with us.', label: 'FOR THE PEOPLE. FOR BUSIA.' },
-  { src: '/images/candidate-address.jpeg', width: 679, height: 452, alt: 'Arthur Amug Osiya speaking at an outdoor gathering', title: 'Our next chapter.', emphasis: 'Together.', label: 'ONE BUSIA. MANY POSSIBILITIES.' },
-  { src: '/images/candidate-conversation.jpeg', width: 606, height: 506, alt: 'Arthur Amug Osiya speaking during a seated discussion', title: 'People are', emphasis: 'the purpose.', label: 'A SHARED HOME. A SHARED FUTURE.' },
-]
-const currentHero = computed(() => heroSlides[heroIndex.value])
-function changeHero(direction) { heroIndex.value = (heroIndex.value + direction + heroSlides.length) % heroSlides.length }
-function selectHero(index) { heroPlaying.value = false; heroIndex.value = index }
 const questions = [
   { question: 'What is the vision for Busia in 2027?', answer: 'A people-first future built around livelihoods, accessible healthcare, education and opportunity. Explore the four proposed priorities above to see the areas this website puts forward for discussion.' },
   { question: 'Is a political party represented here?', answer: 'This website presents Arthur Amug Osiya’s Busia 2027 identity without indicating a political party. The focus is on the candidate, the proposed priorities and the people of Busia.' },
@@ -87,7 +75,6 @@ const handleKey = (event) => {
     else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus() }
   }
 }
-let heroTimer
 let sectionObserver
 function updateProgress() {
   const available = document.documentElement.scrollHeight - window.innerHeight
@@ -96,9 +83,6 @@ function updateProgress() {
 onMounted(() => {
   document.addEventListener('keydown', handleKey)
   window.addEventListener('scroll', updateProgress, { passive: true })
-  heroTimer = window.setInterval(() => {
-    if (heroPlaying.value && !heroHovered.value && !heroFocused.value && !document.hidden && galleryIndex.value === null && !joinOpen.value) changeHero(1)
-  }, 6000)
   if ('IntersectionObserver' in window) {
     sectionObserver = new window.IntersectionObserver(entries => {
       entries.forEach(entry => { if (entry.isIntersecting) activeSection.value = entry.target.id })
@@ -109,7 +93,6 @@ onMounted(() => {
 onBeforeUnmount(() => {
   document.removeEventListener('keydown', handleKey)
   window.removeEventListener('scroll', updateProgress)
-  window.clearInterval(heroTimer)
   sectionObserver?.disconnect()
 })
 </script>
@@ -129,17 +112,17 @@ onBeforeUnmount(() => {
   </header>
 
   <main id="main">
-    <section id="home" class="hero hero-expedition section-anchor" role="region" aria-roledescription="carousel" aria-label="Arthur in focus" @mouseenter="heroHovered = true" @mouseleave="heroHovered = false" @focusin="heroFocused = true" @focusout="heroFocused = false" @keydown.left.prevent="heroPlaying = false; changeHero(-1)" @keydown.right.prevent="heroPlaying = false; changeHero(1)">
-      <div class="campaign-backdrop"><Transition name="hero-crossfade"><img :key="currentHero.src" class="campaign-scene" :src="currentHero.src" :alt="currentHero.alt" :width="currentHero.width" :height="currentHero.height" :style="{ maxWidth: `${currentHero.width}px`, maxHeight: `${currentHero.height}px`, objectPosition: heroIndex === 0 ? '32% center' : '50% center' }" fetchpriority="high" decoding="async" /></Transition></div>
+    <section id="home" class="hero hero-expedition section-anchor" aria-labelledby="hero-title">
+      <div class="campaign-backdrop"><img class="campaign-scene" src="/images/candidate-leadership.webp" alt="Arthur Amug Osiya addressing an indoor gathering from a lectern" width="960" height="640" fetchpriority="high" decoding="async" /></div>
       <div class="campaign-shade" aria-hidden="true"></div>
       <div class="campaign-glow" aria-hidden="true"></div>
       <div class="container campaign-hero-content">
         <div class="eyebrow campaign-pill"><span class="live-dot"></span> ARTHUR AMUG OSIYA · BUSIA GOVERNOR 2027</div>
-        <h1><span class="campaign-heading">A stronger Busia.</span><span class="campaign-heading-accent">Built together.</span></h1>
+        <h1 id="hero-title"><span class="campaign-heading">A stronger Busia.</span><span class="campaign-heading-accent">Built together.</span></h1>
         <p class="hero-description">Our home. Our potential. Our shared future. A people-first vision for a county where everyone has the chance to move forward.</p>
         <div class="hero-actions"><a class="button campaign-primary" href="#vision">Explore our vision <ArrowUpRight :size="18" /></a><button class="button campaign-secondary" @click="openJoin">Be part of the journey <ArrowUpRight :size="18" /></button></div>
       </div>
-      <div class="container campaign-hero-footer"><a class="campaign-scroll" href="#about">Discover the person behind the vision <span><ArrowDown :size="16" /></span></a><div class="campaign-slideshow"><span class="campaign-photo-count" :aria-live="heroPlaying ? 'off' : 'polite'">0{{ heroIndex + 1 }} <span>/ 03</span></span><div class="carousel-dots" role="group" aria-label="Choose featured photo"><button v-for="(slide, index) in heroSlides" :key="slide.src" :class="{ active: heroIndex === index }" :aria-label="`Show featured photo ${index + 1}`" :aria-pressed="heroIndex === index" @click="selectHero(index)"><span></span></button></div><div class="carousel-buttons"><button :aria-label="heroPlaying ? 'Pause photo slideshow' : 'Play photo slideshow'" :aria-pressed="heroPlaying" @click="heroPlaying = !heroPlaying"><Pause v-if="heroPlaying" :size="14" /><Play v-else :size="14" /></button><button aria-label="Previous featured photo" @click="heroPlaying = false; changeHero(-1)"><ArrowRight class="reverse-arrow" :size="17" /></button><button aria-label="Next featured photo" @click="heroPlaying = false; changeHero(1)"><ArrowRight :size="17" /></button></div></div></div>
+      <div class="container campaign-hero-footer"><a class="campaign-scroll" href="#about">Discover the person behind the vision <span><ArrowDown :size="16" /></span></a></div>
       <div class="campaign-side-note" aria-hidden="true"><MapPin :size="13" /> BUSIA COUNTY, KENYA</div>
     </section>
 

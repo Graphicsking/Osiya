@@ -49,16 +49,18 @@ test('mobile navigation closes when a section is selected', async () => {
   assert.equal(document.querySelector('.menu-toggle').getAttribute('aria-expanded'), 'false')
 })
 
-test('featured photo controls wrap, select a slide, and expose a playback control', async () => {
-  await click(document.querySelector('[aria-label="Previous featured photo"]'))
-  assert.equal(document.querySelector('[aria-label="Show featured photo 3"]').getAttribute('aria-pressed'), 'true')
-  await click(document.querySelector('[aria-label="Show featured photo 2"]'))
-  assert.equal(document.querySelector('[aria-label="Show featured photo 2"]').getAttribute('aria-pressed'), 'true')
-  await click(document.querySelector('[aria-label="Play photo slideshow"]'))
-  assert.ok(document.querySelector('[aria-label="Pause photo slideshow"]'))
-  await click(document.querySelector('[aria-label="Next featured photo"]'))
-  assert.ok(document.querySelector('[aria-label="Play photo slideshow"]'))
-  await click(document.querySelector('[aria-label="Show featured photo 1"]'))
+test('static hero keeps its background and its campaign call to action opens the interest form', async () => {
+  const hero = document.querySelector('#home')
+  const image = hero.querySelector('img')
+  assert.equal(hero.querySelectorAll('img').length, 1)
+  assert.equal(hero.querySelector('[aria-roledescription="carousel"]'), null)
+  const source = image.getAttribute('src')
+  await keyboard(hero, 'ArrowRight')
+  assert.equal(image.getAttribute('src'), source)
+  await click(hero.querySelector('.campaign-secondary'))
+  assert.ok(document.querySelector('.interest-dialog'))
+  await keyboard(document, 'Escape')
+  assert.equal(document.querySelector('.interest-dialog'), null)
 })
 
 test('gallery filters and show-more retain the correct photo when opened', async () => {
