@@ -144,7 +144,6 @@ onBeforeUnmount(() => {
 
     <section class="statement">
       <div class="container statement-inner">
-        <div class="statement-side">ONE COUNTY.<br />A WORLD OF POSSIBILITY.</div>
         <div class="statement-belief">
           <span class="statement-star" aria-hidden="true">✳</span>
           <div>
@@ -152,6 +151,7 @@ onBeforeUnmount(() => {
             <div class="statement-copy">Progress means more<br />when it <span>includes everyone.</span></div>
           </div>
         </div>
+        <div class="statement-side">ONE COUNTY.<br />A WORLD OF POSSIBILITY.</div>
       </div>
     </section>
 
