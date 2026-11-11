@@ -1,0 +1,117 @@
+<script setup>
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { ArrowUpRight, ArrowRight, ArrowDown, Menu, X, Plus, Minus, Heart, Sprout, Stethoscope, GraduationCap, BriefcaseBusiness, Check, MapPin } from '@lucide/vue'
+import InterestDialog from './components/InterestDialog.vue'
+
+const menuOpen = ref(false)
+const joinOpen = ref(false)
+const selectedPriority = ref(0)
+const galleryIndex = ref(null)
+const priorities = [
+  { icon: Sprout, name: 'Agriculture & livelihoods', short: 'A stronger foundation for every family.', title: 'Make hard work\nwork for our farmers.', description: 'A proposed agenda that puts the people who grow our food at the centre of our county’s progress.', points: ['Better access to inputs, extension services and markets', 'Value addition that keeps more opportunity close to home', 'Practical support for small businesses and cooperatives'], tag: 'Growing opportunity' },
+  { icon: Stethoscope, name: 'Accessible healthcare', short: 'Quality care, closer to home.', title: 'Better care.\nGreater peace of mind.', description: 'A vision for accessible, dignified healthcare, with stronger local services and a focus on prevention.', points: ['Stronger primary healthcare and community health services', 'Reliable essential supplies and responsive facilities', 'Maternal and child health at the heart of planning'], tag: 'Health with dignity' },
+  { icon: GraduationCap, name: 'Education & skills', short: 'Give the next generation a fair start.', title: 'Open doors.\nUnlock possibility.', description: 'A proposed focus on early learning and practical skills that help people turn ambition into opportunity.', points: ['Supportive early childhood learning environments', 'Practical vocational skills and pathways into work', 'Transparent, fair access to county education support'], tag: 'Potential without limits' },
+  { icon: BriefcaseBusiness, name: 'Enterprise & opportunity', short: 'An economy that includes everyone.', title: 'Local ambition.\nReal opportunity.', description: 'A vision for a county where enterprise can grow and public services help people move forward.', points: ['A friendlier environment for local enterprise', 'Better connections between producers and markets', 'Public participation and accountable county spending'], tag: 'Progress we can share' },
+]
+const activePriority = computed(() => priorities[selectedPriority.value])
+function movePriority(index, direction) {
+  selectedPriority.value = (index + direction + priorities.length) % priorities.length
+  nextTick(() => document.getElementById(`priority-tab-${selectedPriority.value}`)?.focus())
+}
+const gallery = [
+  { src: '/images/candidate-community.jpeg', alt: 'Candidate smiling while holding a microphone at a gathering', label: 'People at the heart', caption: 'A campaign vision rooted in connection.' },
+  { src: '/images/candidate-address.jpeg', alt: 'Candidate delivering an outdoor address', label: 'A shared direction', caption: 'Space for ideas. A voice for everyone.' },
+  { src: '/images/candidate-conversation.jpeg', alt: 'Candidate speaking during a seated discussion', label: 'Ideas into possibility', caption: 'A conversation about the future.' },
+]
+const closeMenu = () => { menuOpen.value = false }
+const openJoin = () => { closeMenu(); joinOpen.value = true }
+const closeGallery = () => { galleryIndex.value = null }
+const changePhoto = (direction) => { galleryIndex.value = (galleryIndex.value + direction + gallery.length) % gallery.length }
+let galleryTrigger
+let galleryOverflow
+watch(galleryIndex, async (value, previous) => {
+  if (value !== null && previous === null) {
+    galleryTrigger = document.activeElement
+    galleryOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    await nextTick()
+    document.querySelector('.lightbox-close')?.focus()
+  } else if (value === null) {
+    document.body.style.overflow = galleryOverflow
+    galleryTrigger?.focus()
+  }
+})
+const handleKey = (event) => {
+  if (event.key === 'Escape') { closeMenu(); closeGallery() }
+  if (galleryIndex.value !== null && event.key === 'ArrowRight') changePhoto(1)
+  if (galleryIndex.value !== null && event.key === 'ArrowLeft') changePhoto(-1)
+  if (galleryIndex.value !== null && event.key === 'Tab') {
+    const controls = document.querySelectorAll('.lightbox button')
+    const first = controls[0]; const last = controls[controls.length - 1]
+    if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus() }
+    else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus() }
+  }
+}
+onMounted(() => document.addEventListener('keydown', handleKey))
+onBeforeUnmount(() => document.removeEventListener('keydown', handleKey))
+</script>
+
+<template>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="announcement"><span class="live-dot"></span> A new chapter for Busia. A future we build together. <a href="#vision">Discover the vision <ArrowUpRight :size="13" /></a></div>
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a class="brand" href="#home" aria-label="Busia 2027 home" @click="closeMenu"><span class="brand-mark">b<span>✳</span></span><span class="brand-word">ARTHUR<span>AMUG OSIYA · 2027</span></span></a>
+      <nav class="desktop-nav" aria-label="Main navigation"><a href="#about">The candidate</a><a href="#vision">Our vision</a><a href="#moments">In the community</a></nav>
+      <button class="button nav-cta" @click="openJoin">Get involved <ArrowUpRight :size="17" /></button>
+      <button class="menu-toggle" :aria-expanded="menuOpen" aria-controls="mobile-nav" :aria-label="menuOpen ? 'Close menu' : 'Open menu'" @click="menuOpen = !menuOpen"><X v-if="menuOpen" /><Menu v-else /></button>
+    </div>
+    <nav v-if="menuOpen" id="mobile-nav" class="mobile-nav" aria-label="Mobile navigation"><a href="#about" @click="closeMenu">The candidate <ArrowUpRight :size="18" /></a><a href="#vision" @click="closeMenu">Our vision <ArrowUpRight :size="18" /></a><a href="#moments" @click="closeMenu">In the community <ArrowUpRight :size="18" /></a><button class="button" @click="openJoin">Get involved <ArrowUpRight :size="18" /></button></nav>
+  </header>
+
+  <main id="main">
+    <section id="home" class="hero section-anchor">
+      <div class="container hero-grid">
+        <div class="hero-content">
+          <div class="eyebrow"><span class="tiny-line"></span> ARTHUR AMUG OSIYA · BUSIA GOVERNOR 2027</div>
+          <h1>A stronger<br /><span>Busia.</span> Built<br />together<span class="title-dot">.</span></h1>
+          <p class="hero-description">Our home. Our potential. Our shared future.<br class="desktop-break" /> A people-first vision for a county where<br class="desktop-break" /> everyone has the chance to move forward.</p>
+          <div class="hero-actions"><a class="button" href="#vision">Explore the vision <ArrowUpRight :size="19" /></a><a class="text-link" href="#about">Meet the candidate <ArrowRight :size="17" /></a></div>
+          <div class="hero-bottom"><span class="small-sun">✳</span><p>Rooted in our people.<br /><strong>Ready for our next chapter.</strong></p><a href="#about" class="scroll-cue" aria-label="Scroll to the candidate"><ArrowDown :size="17" /></a></div>
+        </div>
+        <div class="hero-visual">
+          <div class="hero-photo-wrap"><img class="hero-photo" src="/images/candidate-portrait.jpeg" alt="Candidate in a white shirt and red tie, standing beside the Kenyan flag" fetchpriority="high" /><div class="photo-gradient"></div><span class="photo-label"><span class="live-dot"></span> FOR THE PEOPLE. FOR BUSIA.</span><div class="hero-photo-caption">The future starts<br />with <em>us.</em></div></div>
+          <div class="orbit-stamp" aria-label="One Busia, one shared future"><span>ONE BUSIA</span><span class="stamp-sun">✳</span><span>ONE SHARED FUTURE</span></div>
+          <div class="hero-image-foot"><span><MapPin :size="13" /> Busia County, Kenya</span><span>01 — A NEW CHAPTER</span></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="values-strip"><div class="container"><span>People first.</span><span class="strip-star">✳</span><span>Opportunity for all.</span><span class="strip-star">✳</span><span>Progress, together.</span><span class="strip-star">✳</span><span class="strip-kiswahili">Busia ni yetu.</span></div></div>
+
+    <section id="about" class="about section-anchor section-space">
+      <div class="container about-grid">
+        <div class="about-visual"><div class="about-image"><img src="/images/candidate-community.jpeg" alt="Candidate smiling at a community gathering" loading="lazy" /></div><div class="image-note"><span class="note-star">✳</span><span>A shared home.<br /><strong>A shared responsibility.</strong></span></div><span class="vertical-label">THE PEOPLE ARE THE PURPOSE</span></div>
+        <div class="about-copy"><div class="eyebrow">01 / MEET ARTHUR AMUG OSIYA</div><h2>Arthur Amug Osiya.<br /><span class="serif-word">A shared vision.</span></h2><p class="intro-copy">Because a better future begins with the people who call Busia home.</p><p>From the farmer and the small business owner to the student imagining what comes next, every voice deserves a place in the conversation.</p><p>This is a vision built around everyday aspirations: a dignified livelihood, care when it matters, and opportunity that reaches further.</p><a class="text-link underlined" href="#vision">Discover the priorities <ArrowUpRight :size="19" /></a><div class="about-signoff"><span class="handwritten">For our home. For our future.</span><span>ARTHUR AMUG OSIYA · BUSIA 2027</span></div></div>
+      </div>
+    </section>
+
+    <section id="vision" class="vision section-space section-anchor">
+      <div class="container"><div class="section-heading"><div><div class="eyebrow">02 / A PEOPLE-FIRST AGENDA</div><h2>Big possibilities.<br /><span class="serif-word">Everyday priorities.</span></h2></div><p>A proposed vision focused on what matters<br class="desktop-break" /> to our families, our livelihoods and our future.</p></div>
+        <div class="priorities-layout"><div class="priority-tabs" role="tablist" aria-label="Proposed campaign priorities" aria-orientation="vertical"><button v-for="(priority, index) in priorities" :id="`priority-tab-${index}`" :key="priority.name" role="tab" :aria-selected="selectedPriority === index" :aria-controls="`priority-panel-${index}`" :tabindex="selectedPriority === index ? 0 : -1" :class="['priority-tab', { active: selectedPriority === index }]" @click="selectedPriority = index" @keydown.down.prevent="movePriority(index, 1)" @keydown.up.prevent="movePriority(index, -1)"><span class="priority-icon"><component :is="priority.icon" :size="23" :stroke-width="1.5" /></span><span class="priority-label"><strong>{{ priority.name }}</strong><small>{{ priority.short }}</small></span><Minus v-if="selectedPriority === index" :size="18" /><Plus v-else :size="18" /></button></div>
+        <div :id="`priority-panel-${selectedPriority}`" class="priority-panel" role="tabpanel" :aria-labelledby="`priority-tab-${selectedPriority}`" tabindex="0"><div class="panel-top"><span class="pill"><span class="live-dot"></span>{{ activePriority.tag }}</span><span class="panel-number">0{{ selectedPriority + 1 }}</span></div><h3>{{ activePriority.title }}</h3><p>{{ activePriority.description }}</p><ul><li v-for="point in activePriority.points" :key="point"><span><Check :size="13" /></span>{{ point }}</li></ul><div class="panel-bottom"><span>THE PROPOSED 2027 AGENDA</span><component :is="activePriority.icon" :size="33" :stroke-width="1" /></div></div></div>
+      </div>
+    </section>
+
+    <section class="statement"><div class="container statement-inner"><span class="statement-star">✳</span><div><div class="eyebrow">OUR SHARED BELIEF</div><p>Progress means more<br />when it <span>includes everyone.</span></p></div><span class="statement-side">ONE COUNTY.<br />A WORLD OF POSSIBILITY.</span></div></section>
+
+    <section id="moments" class="moments section-space section-anchor"><div class="container"><div class="section-heading"><div><div class="eyebrow">03 / PEOPLE. PURPOSE. CONNECTION.</div><h2>A vision with<br /><span class="serif-word">a human face.</span></h2></div><p>The conversations and connections<br class="desktop-break" /> that put people at the centre.</p></div><div class="gallery-grid"><button v-for="(photo, index) in gallery" :key="photo.src" class="gallery-card" @click="galleryIndex = index" :aria-label="`View photo: ${photo.label}`"><div class="gallery-image"><img :src="photo.src" :alt="photo.alt" loading="lazy" /><span class="gallery-expand"><ArrowUpRight :size="22" /></span><span class="gallery-count">0{{ index + 1 }} / MOMENTS</span></div><div class="gallery-info"><h3>{{ photo.label }}</h3><p>{{ photo.caption }}</p></div></button></div><div class="gallery-foot"><span>Different conversations. One shared future.</span><span>BUSIA, TOGETHER <span class="foot-star">✳</span></span></div></div></section>
+
+    <section id="get-involved" class="join-section section-anchor"><div class="container join-inner"><div class="join-copy"><div class="eyebrow">THE NEXT CHAPTER NEEDS YOU</div><h2>Our home.<br />Our future.<br /><span>Our move.</span><span class="join-star">✳</span></h2><p>A stronger Busia begins with all of us.<br />Bring your ideas, your energy and your voice.</p><button class="button button-cream" @click="openJoin">Be part of the journey <ArrowUpRight :size="20" /></button></div><div class="join-art" aria-hidden="true"><div class="art-ring ring-one"></div><div class="art-ring ring-two"></div><div class="art-ring ring-three"></div><span class="art-year">20<br />27<span>BUILT TOGETHER.</span></span><span class="art-flower">✳</span><span class="art-word">BUSIA NI YETU.</span></div></div></section>
+  </main>
+
+  <footer><div class="container"><div class="footer-top"><a class="brand" href="#home" aria-label="Busia 2027 home"><span class="brand-mark">b<span>✳</span></span><span class="brand-word">ARTHUR<span>AMUG OSIYA · 2027</span></span></a><p>A stronger Busia.<br />Built together.</p><nav aria-label="Footer navigation"><a href="#about">The candidate</a><a href="#vision">Our vision</a><button @click="openJoin">Get involved <ArrowUpRight :size="14" /></button></nav><a class="back-top" href="#home">Back to top <ArrowUpRight :size="18" /></a></div><div class="footer-bottom"><span>© {{ new Date().getFullYear() }} Busia 2027 · Website concept</span><span>Draft campaign priorities — subject to candidate approval.</span><span>Made for a shared future <Heart :size="12" /></span></div></div></footer>
+
+  <InterestDialog v-if="joinOpen" @close="joinOpen = false" />
+  <div v-if="galleryIndex !== null" class="lightbox" role="dialog" aria-modal="true" aria-label="Campaign photo gallery" @click.self="closeGallery"><button class="lightbox-close" @click="closeGallery" aria-label="Close gallery" autofocus><X /></button><button class="lightbox-prev" @click="changePhoto(-1)" aria-label="Previous photo"><ArrowRight /></button><figure><img :src="gallery[galleryIndex].src" :alt="gallery[galleryIndex].alt" /><figcaption>{{ gallery[galleryIndex].label }} <span>{{ galleryIndex + 1 }} / {{ gallery.length }}</span></figcaption></figure><button class="lightbox-next" @click="changePhoto(1)" aria-label="Next photo"><ArrowRight /></button></div>
+</template>
