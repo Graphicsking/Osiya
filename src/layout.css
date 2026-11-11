@@ -14,8 +14,9 @@
 }
 
 .mobile-nav { padding-inline: var(--page-gutter); }
-.about-grid { grid-template-columns: minmax(0, clamp(260px, 30vw, 360px)) minmax(0, 1fr); gap: clamp(24px, 3vw, 40px); }
-.about-visual { justify-self: start; margin-inline: 0; padding-right: 0; }
+.about-grid { grid-template-columns: minmax(0, clamp(280px, 36vw, 440px)) minmax(0, 1fr); gap: clamp(24px, 3vw, 40px); }
+.about-visual { max-width: 440px; justify-self: start; margin-inline: 0; padding-right: 0; }
+.about-image { width: 100%; max-width: none; }
 .about-visual .image-note { max-width: 100%; }
 .about-copy { min-width: 0; width: 100%; }
 .about-copy > p,
