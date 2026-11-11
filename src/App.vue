@@ -129,22 +129,18 @@ onBeforeUnmount(() => {
   </header>
 
   <main id="main">
-    <section id="home" class="hero section-anchor">
-      <div class="container hero-grid">
-        <div class="hero-content">
-          <div class="eyebrow"><span class="tiny-line"></span> ARTHUR AMUG OSIYA · BUSIA GOVERNOR 2027</div>
-          <h1>A stronger<br /><span>Busia.</span> Built<br />together<span class="title-dot">.</span></h1>
-          <p class="hero-description">Our home. Our potential. Our shared future.<br class="desktop-break" /> A people-first vision for a county where<br class="desktop-break" /> everyone has the chance to move forward.</p>
-          <div class="hero-actions"><a class="button" href="#vision">Explore the vision <ArrowUpRight :size="19" /></a><a class="text-link" href="#about">Meet the candidate <ArrowRight :size="17" /></a></div>
-          <div class="hero-bottom"><span class="small-sun">✳</span><p>Rooted in our people.<br /><strong>Ready for our next chapter.</strong></p><a href="#about" class="scroll-cue" aria-label="Scroll to the candidate"><ArrowDown :size="17" /></a></div>
-        </div>
-        <div class="hero-visual" role="region" aria-roledescription="carousel" aria-label="Arthur in focus" @mouseenter="heroHovered = true" @mouseleave="heroHovered = false" @focusin="heroFocused = true" @focusout="heroFocused = false" @keydown.left.prevent="heroPlaying = false; changeHero(-1)" @keydown.right.prevent="heroPlaying = false; changeHero(1)">
-          <div class="hero-photo-wrap"><Transition name="photo-swap" mode="out-in"><img :key="currentHero.src" class="hero-photo" :src="currentHero.src" :alt="currentHero.alt" :width="currentHero.width" :height="currentHero.height" :style="{ maxWidth: `${currentHero.width}px`, maxHeight: `${currentHero.height}px` }" fetchpriority="high" /></Transition><div class="photo-gradient"></div><span class="photo-label"><span class="live-dot"></span>{{ currentHero.label }}</span><div class="hero-photo-caption">{{ currentHero.title }}<br /><em>{{ currentHero.emphasis }}</em></div></div>
-          <div class="orbit-stamp" aria-label="One Busia, one shared future"><span>ONE BUSIA</span><span class="stamp-sun">✳</span><span>ONE SHARED FUTURE</span></div>
-          <div class="hero-image-foot"><span><MapPin :size="13" /> Busia County, Kenya</span><span :aria-live="heroPlaying ? 'off' : 'polite'">0{{ heroIndex + 1 }} / 03 — IN FOCUS</span></div>
-          <div class="carousel-controls"><div class="carousel-dots" role="group" aria-label="Choose featured photo"><button v-for="(slide, index) in heroSlides" :key="slide.src" :class="{ active: heroIndex === index }" :aria-label="`Show featured photo ${index + 1}`" :aria-pressed="heroIndex === index" @click="selectHero(index)"><span></span></button></div><div class="carousel-buttons"><button :aria-label="heroPlaying ? 'Pause photo slideshow' : 'Play photo slideshow'" :aria-pressed="heroPlaying" @click="heroPlaying = !heroPlaying"><Pause v-if="heroPlaying" :size="15" /><Play v-else :size="15" /></button><button aria-label="Previous featured photo" @click="heroPlaying = false; changeHero(-1)"><ArrowRight class="reverse-arrow" :size="17" /></button><button aria-label="Next featured photo" @click="heroPlaying = false; changeHero(1)"><ArrowRight :size="17" /></button></div></div>
-        </div>
+    <section id="home" class="hero hero-expedition section-anchor" role="region" aria-roledescription="carousel" aria-label="Arthur in focus" @mouseenter="heroHovered = true" @mouseleave="heroHovered = false" @focusin="heroFocused = true" @focusout="heroFocused = false" @keydown.left.prevent="heroPlaying = false; changeHero(-1)" @keydown.right.prevent="heroPlaying = false; changeHero(1)">
+      <div class="campaign-backdrop"><Transition name="hero-crossfade"><img :key="currentHero.src" class="campaign-scene" :src="currentHero.src" :alt="currentHero.alt" :width="currentHero.width" :height="currentHero.height" :style="{ maxWidth: `${currentHero.width}px`, maxHeight: `${currentHero.height}px`, objectPosition: heroIndex === 0 ? '32% center' : '50% center' }" fetchpriority="high" decoding="async" /></Transition></div>
+      <div class="campaign-shade" aria-hidden="true"></div>
+      <div class="campaign-glow" aria-hidden="true"></div>
+      <div class="container campaign-hero-content">
+        <div class="eyebrow campaign-pill"><span class="live-dot"></span> ARTHUR AMUG OSIYA · BUSIA GOVERNOR 2027</div>
+        <h1><span class="campaign-heading">A stronger Busia.</span><span class="campaign-heading-accent">Built together.</span></h1>
+        <p class="hero-description">Our home. Our potential. Our shared future. A people-first vision for a county where everyone has the chance to move forward.</p>
+        <div class="hero-actions"><a class="button campaign-primary" href="#vision">Explore our vision <ArrowUpRight :size="18" /></a><button class="button campaign-secondary" @click="openJoin">Be part of the journey <ArrowUpRight :size="18" /></button></div>
       </div>
+      <div class="container campaign-hero-footer"><a class="campaign-scroll" href="#about">Discover the person behind the vision <span><ArrowDown :size="16" /></span></a><div class="campaign-slideshow"><span class="campaign-photo-count" :aria-live="heroPlaying ? 'off' : 'polite'">0{{ heroIndex + 1 }} <span>/ 03</span></span><div class="carousel-dots" role="group" aria-label="Choose featured photo"><button v-for="(slide, index) in heroSlides" :key="slide.src" :class="{ active: heroIndex === index }" :aria-label="`Show featured photo ${index + 1}`" :aria-pressed="heroIndex === index" @click="selectHero(index)"><span></span></button></div><div class="carousel-buttons"><button :aria-label="heroPlaying ? 'Pause photo slideshow' : 'Play photo slideshow'" :aria-pressed="heroPlaying" @click="heroPlaying = !heroPlaying"><Pause v-if="heroPlaying" :size="14" /><Play v-else :size="14" /></button><button aria-label="Previous featured photo" @click="heroPlaying = false; changeHero(-1)"><ArrowRight class="reverse-arrow" :size="17" /></button><button aria-label="Next featured photo" @click="heroPlaying = false; changeHero(1)"><ArrowRight :size="17" /></button></div></div></div>
+      <div class="campaign-side-note" aria-hidden="true"><MapPin :size="13" /> BUSIA COUNTY, KENYA</div>
     </section>
 
     <div class="values-strip"><div class="container"><span>People first.</span><span class="strip-star">✳</span><span>Opportunity for all.</span><span class="strip-star">✳</span><span>Progress, together.</span><span class="strip-star">✳</span><span class="strip-kiswahili">Busia ni yetu.</span></div></div>
