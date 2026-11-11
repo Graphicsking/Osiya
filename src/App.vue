@@ -1,12 +1,36 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { ArrowUpRight, ArrowRight, ArrowDown, Menu, X, Plus, Minus, Heart, Sprout, Stethoscope, GraduationCap, BriefcaseBusiness, Check, MapPin } from '@lucide/vue'
+import { ArrowUpRight, ArrowRight, ArrowDown, Menu, X, Plus, Minus, Heart, Sprout, Stethoscope, GraduationCap, BriefcaseBusiness, Check, MapPin, Pause, Play } from '@lucide/vue'
 import InterestDialog from './components/InterestDialog.vue'
 
 const menuOpen = ref(false)
 const joinOpen = ref(false)
 const selectedPriority = ref(0)
 const galleryIndex = ref(null)
+const galleryFilter = ref('All moments')
+const visiblePhotoCount = ref(6)
+const heroIndex = ref(0)
+const heroPlaying = ref(false)
+const heroHovered = ref(false)
+const heroFocused = ref(false)
+const openQuestion = ref(0)
+const activeSection = ref('home')
+const scrollProgress = ref(0)
+const galleryFilters = ['All moments', 'Community', 'Leadership']
+const heroSlides = [
+  { src: '/images/candidate-portrait.jpeg', alt: 'Arthur Amug Osiya in a white shirt and red tie beside the Kenyan flag', title: 'The future starts', emphasis: 'with us.', label: 'FOR THE PEOPLE. FOR BUSIA.', position: '50% 29%' },
+  { src: '/images/candidate-community.jpeg', alt: 'Arthur Amug Osiya smiling with a microphone at a gathering', title: 'People are', emphasis: 'the purpose.', label: 'A SHARED HOME. A SHARED FUTURE.', position: '50% 23%' },
+  { src: '/images/candidate-address.jpeg', alt: 'Arthur Amug Osiya speaking at an outdoor gathering', title: 'Our next chapter.', emphasis: 'Together.', label: 'ONE BUSIA. MANY POSSIBILITIES.', position: '47% 30%' },
+]
+const currentHero = computed(() => heroSlides[heroIndex.value])
+function changeHero(direction) { heroIndex.value = (heroIndex.value + direction + heroSlides.length) % heroSlides.length }
+function selectHero(index) { heroPlaying.value = false; heroIndex.value = index }
+const questions = [
+  { question: 'What is the vision for Busia in 2027?', answer: 'A people-first future built around livelihoods, accessible healthcare, education and opportunity. Explore the four proposed priorities above to see the areas this website puts forward for discussion.' },
+  { question: 'Is a political party represented here?', answer: 'This website presents Arthur Amug Osiya’s Busia 2027 identity without indicating a political party. The focus is on the candidate, the proposed priorities and the people of Busia.' },
+  { question: 'Are these the final campaign commitments?', answer: 'The priorities on this website are draft proposals for review and conversation. They should not be treated as a final, published manifesto until approved by the candidate.' },
+  { question: 'How can I get involved?', answer: 'Choose “Get involved” to prepare your interest in volunteering, sharing an idea or joining community conversations. In this preview, the form saves a draft on your device and lets you download or remove it. It does not yet send your details to the campaign.' },
+]
 const priorities = [
   { icon: Sprout, name: 'Agriculture & livelihoods', short: 'A stronger foundation for every family.', title: 'Make hard work\nwork for our farmers.', description: 'A proposed agenda that puts the people who grow our food at the centre of our county’s progress.', points: ['Better access to inputs, extension services and markets', 'Value addition that keeps more opportunity close to home', 'Practical support for small businesses and cooperatives'], tag: 'Growing opportunity' },
   { icon: Stethoscope, name: 'Accessible healthcare', short: 'Quality care, closer to home.', title: 'Better care.\nGreater peace of mind.', description: 'A vision for accessible, dignified healthcare, with stronger local services and a focus on prevention.', points: ['Stronger primary healthcare and community health services', 'Reliable essential supplies and responsive facilities', 'Maternal and child health at the heart of planning'], tag: 'Health with dignity' },
@@ -19,10 +43,25 @@ function movePriority(index, direction) {
   nextTick(() => document.getElementById(`priority-tab-${selectedPriority.value}`)?.focus())
 }
 const gallery = [
-  { src: '/images/candidate-community.jpeg', alt: 'Candidate smiling while holding a microphone at a gathering', label: 'People at the heart', caption: 'A campaign vision rooted in connection.' },
-  { src: '/images/candidate-address.jpeg', alt: 'Candidate delivering an outdoor address', label: 'A shared direction', caption: 'Space for ideas. A voice for everyone.' },
-  { src: '/images/candidate-conversation.jpeg', alt: 'Candidate speaking during a seated discussion', label: 'Ideas into possibility', caption: 'A conversation about the future.' },
+  { src: '/images/candidate-community.jpeg', alt: 'Arthur Amug Osiya smiling while holding a microphone at a gathering', label: 'People at the heart', caption: 'A campaign vision rooted in connection.', category: 'Community' },
+  { src: '/images/candidate-address.jpeg', alt: 'Arthur Amug Osiya delivering an outdoor address', label: 'A shared direction', caption: 'Space for ideas. A voice for everyone.', category: 'Community' },
+  { src: '/images/candidate-conversation.jpeg', alt: 'Arthur Amug Osiya speaking during a seated discussion', label: 'Ideas into possibility', caption: 'A conversation about the future.', category: 'Leadership' },
+  { src: '/images/candidate-leadership.webp', alt: 'Arthur Amug Osiya addressing an indoor gathering from a lectern', label: 'Purpose in every conversation', caption: 'The person behind the proposed vision.', category: 'Leadership' },
+  { src: '/images/candidate-speaking.jpeg', alt: 'Arthur Amug Osiya speaking into a microphone beside flags', label: 'A voice for the future', caption: 'Putting shared aspirations into words.', category: 'Leadership' },
+  { src: '/images/candidate-gathering.jpeg', alt: 'Arthur Amug Osiya in a red sweater addressing a gathering', label: 'Different places. Shared hopes.', caption: 'A future that brings people together.', category: 'Community' },
+  { src: '/images/candidate-office.jpeg', alt: 'Arthur Amug Osiya seated at a desk in a blue suit', label: 'The person behind the vision', caption: 'A closer look at Arthur Amug Osiya.', category: 'Leadership' },
+  { src: '/images/candidate-dialogue.jpeg', alt: 'Arthur Amug Osiya seated at a table with his hands clasped', label: 'Room for dialogue', caption: 'Good conversations make room for ideas.', category: 'Leadership' },
+  { src: '/images/candidate-meeting.jpeg', alt: 'Arthur Amug Osiya seated at a meeting table with a microphone', label: 'At the table', caption: 'A shared future begins with a conversation.', category: 'Leadership' },
 ]
+const filteredGallery = computed(() => galleryFilter.value === 'All moments' ? gallery : gallery.filter(photo => photo.category === galleryFilter.value))
+const visibleGallery = computed(() => filteredGallery.value.slice(0, visiblePhotoCount.value))
+function filterGallery(filter) { galleryFilter.value = filter; visiblePhotoCount.value = 6 }
+function openPhoto(photo) { galleryIndex.value = gallery.indexOf(photo) }
+function revealPhotos() {
+  const firstNewPhoto = visiblePhotoCount.value
+  visiblePhotoCount.value += 3
+  nextTick(() => document.querySelectorAll('.gallery-card')[firstNewPhoto]?.focus())
+}
 const closeMenu = () => { menuOpen.value = false }
 const openJoin = () => { closeMenu(); joinOpen.value = true }
 const closeGallery = () => { galleryIndex.value = null }
@@ -52,21 +91,45 @@ const handleKey = (event) => {
     else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus() }
   }
 }
-onMounted(() => document.addEventListener('keydown', handleKey))
-onBeforeUnmount(() => document.removeEventListener('keydown', handleKey))
+let heroTimer
+let sectionObserver
+function updateProgress() {
+  const available = document.documentElement.scrollHeight - window.innerHeight
+  scrollProgress.value = available > 0 ? Math.min(100, Math.max(0, window.scrollY / available * 100)) : 0
+}
+onMounted(() => {
+  document.addEventListener('keydown', handleKey)
+  window.addEventListener('scroll', updateProgress, { passive: true })
+  heroTimer = window.setInterval(() => {
+    if (heroPlaying.value && !heroHovered.value && !heroFocused.value && !document.hidden && galleryIndex.value === null && !joinOpen.value) changeHero(1)
+  }, 6000)
+  if ('IntersectionObserver' in window) {
+    sectionObserver = new window.IntersectionObserver(entries => {
+      entries.forEach(entry => { if (entry.isIntersecting) activeSection.value = entry.target.id })
+    }, { rootMargin: '-20% 0px -55% 0px' })
+    document.querySelectorAll('main section[id]').forEach(section => sectionObserver.observe(section))
+  }
+})
+onBeforeUnmount(() => {
+  document.removeEventListener('keydown', handleKey)
+  window.removeEventListener('scroll', updateProgress)
+  window.clearInterval(heroTimer)
+  sectionObserver?.disconnect()
+})
 </script>
 
 <template>
   <a class="skip-link" href="#main">Skip to content</a>
   <div class="announcement"><span class="live-dot"></span> A new chapter for Busia. A future we build together. <a href="#vision">Discover the vision <ArrowUpRight :size="13" /></a></div>
   <header class="site-header">
+    <div class="reading-progress" :style="{ width: `${scrollProgress}%` }" aria-hidden="true"></div>
     <div class="container nav-wrap">
       <a class="brand" href="#home" aria-label="Busia 2027 home" @click="closeMenu"><span class="brand-mark">b<span>✳</span></span><span class="brand-word">ARTHUR<span>AMUG OSIYA · 2027</span></span></a>
-      <nav class="desktop-nav" aria-label="Main navigation"><a href="#about">The candidate</a><a href="#vision">Our vision</a><a href="#moments">In the community</a></nav>
+      <nav class="desktop-nav" aria-label="Main navigation"><a href="#about" :aria-current="activeSection === 'about' ? 'location' : undefined">The candidate</a><a href="#vision" :aria-current="activeSection === 'vision' ? 'location' : undefined">Our vision</a><a href="#moments" :aria-current="activeSection === 'moments' ? 'location' : undefined">In the community</a><a href="#questions" :aria-current="activeSection === 'questions' ? 'location' : undefined">Q&A</a></nav>
       <button class="button nav-cta" @click="openJoin">Get involved <ArrowUpRight :size="17" /></button>
       <button class="menu-toggle" :aria-expanded="menuOpen" aria-controls="mobile-nav" :aria-label="menuOpen ? 'Close menu' : 'Open menu'" @click="menuOpen = !menuOpen"><X v-if="menuOpen" /><Menu v-else /></button>
     </div>
-    <nav v-if="menuOpen" id="mobile-nav" class="mobile-nav" aria-label="Mobile navigation"><a href="#about" @click="closeMenu">The candidate <ArrowUpRight :size="18" /></a><a href="#vision" @click="closeMenu">Our vision <ArrowUpRight :size="18" /></a><a href="#moments" @click="closeMenu">In the community <ArrowUpRight :size="18" /></a><button class="button" @click="openJoin">Get involved <ArrowUpRight :size="18" /></button></nav>
+    <nav v-if="menuOpen" id="mobile-nav" class="mobile-nav" aria-label="Mobile navigation"><a href="#about" @click="closeMenu">The candidate <ArrowUpRight :size="18" /></a><a href="#vision" @click="closeMenu">Our vision <ArrowUpRight :size="18" /></a><a href="#moments" @click="closeMenu">In the community <ArrowUpRight :size="18" /></a><a href="#questions" @click="closeMenu">Questions & answers <ArrowUpRight :size="18" /></a><button class="button" @click="openJoin">Get involved <ArrowUpRight :size="18" /></button></nav>
   </header>
 
   <main id="main">
@@ -79,10 +142,11 @@ onBeforeUnmount(() => document.removeEventListener('keydown', handleKey))
           <div class="hero-actions"><a class="button" href="#vision">Explore the vision <ArrowUpRight :size="19" /></a><a class="text-link" href="#about">Meet the candidate <ArrowRight :size="17" /></a></div>
           <div class="hero-bottom"><span class="small-sun">✳</span><p>Rooted in our people.<br /><strong>Ready for our next chapter.</strong></p><a href="#about" class="scroll-cue" aria-label="Scroll to the candidate"><ArrowDown :size="17" /></a></div>
         </div>
-        <div class="hero-visual">
-          <div class="hero-photo-wrap"><img class="hero-photo" src="/images/candidate-portrait.jpeg" alt="Candidate in a white shirt and red tie, standing beside the Kenyan flag" fetchpriority="high" /><div class="photo-gradient"></div><span class="photo-label"><span class="live-dot"></span> FOR THE PEOPLE. FOR BUSIA.</span><div class="hero-photo-caption">The future starts<br />with <em>us.</em></div></div>
+        <div class="hero-visual" role="region" aria-roledescription="carousel" aria-label="Arthur in focus" @mouseenter="heroHovered = true" @mouseleave="heroHovered = false" @focusin="heroFocused = true" @focusout="heroFocused = false" @keydown.left.prevent="heroPlaying = false; changeHero(-1)" @keydown.right.prevent="heroPlaying = false; changeHero(1)">
+          <div class="hero-photo-wrap"><Transition name="photo-swap" mode="out-in"><img :key="currentHero.src" class="hero-photo" :src="currentHero.src" :alt="currentHero.alt" :style="{ objectPosition: currentHero.position }" fetchpriority="high" /></Transition><div class="photo-gradient"></div><span class="photo-label"><span class="live-dot"></span>{{ currentHero.label }}</span><div class="hero-photo-caption">{{ currentHero.title }}<br /><em>{{ currentHero.emphasis }}</em></div></div>
           <div class="orbit-stamp" aria-label="One Busia, one shared future"><span>ONE BUSIA</span><span class="stamp-sun">✳</span><span>ONE SHARED FUTURE</span></div>
-          <div class="hero-image-foot"><span><MapPin :size="13" /> Busia County, Kenya</span><span>01 — A NEW CHAPTER</span></div>
+          <div class="hero-image-foot"><span><MapPin :size="13" /> Busia County, Kenya</span><span :aria-live="heroPlaying ? 'off' : 'polite'">0{{ heroIndex + 1 }} / 03 — IN FOCUS</span></div>
+          <div class="carousel-controls"><div class="carousel-dots" role="group" aria-label="Choose featured photo"><button v-for="(slide, index) in heroSlides" :key="slide.src" :class="{ active: heroIndex === index }" :aria-label="`Show featured photo ${index + 1}`" :aria-pressed="heroIndex === index" @click="selectHero(index)"><span></span></button></div><div class="carousel-buttons"><button :aria-label="heroPlaying ? 'Pause photo slideshow' : 'Play photo slideshow'" :aria-pressed="heroPlaying" @click="heroPlaying = !heroPlaying"><Pause v-if="heroPlaying" :size="15" /><Play v-else :size="15" /></button><button aria-label="Previous featured photo" @click="heroPlaying = false; changeHero(-1)"><ArrowRight class="reverse-arrow" :size="17" /></button><button aria-label="Next featured photo" @click="heroPlaying = false; changeHero(1)"><ArrowRight :size="17" /></button></div></div>
         </div>
       </div>
     </section>
@@ -103,9 +167,19 @@ onBeforeUnmount(() => document.removeEventListener('keydown', handleKey))
       </div>
     </section>
 
-    <section class="statement"><div class="container statement-inner"><span class="statement-star">✳</span><div><div class="eyebrow">OUR SHARED BELIEF</div><p>Progress means more<br />when it <span>includes everyone.</span></p></div><span class="statement-side">ONE COUNTY.<br />A WORLD OF POSSIBILITY.</span></div></section>
+    <section class="statement"><div class="container statement-inner"><span class="statement-star">✳</span><div><div class="eyebrow">OUR SHARED BELIEF</div><div class="statement-copy">Progress means more<br />when it <span>includes everyone.</span></div></div><span class="statement-side">ONE COUNTY.<br />A WORLD OF POSSIBILITY.</span></div></section>
 
-    <section id="moments" class="moments section-space section-anchor"><div class="container"><div class="section-heading"><div><div class="eyebrow">03 / PEOPLE. PURPOSE. CONNECTION.</div><h2>A vision with<br /><span class="serif-word">a human face.</span></h2></div><p>The conversations and connections<br class="desktop-break" /> that put people at the centre.</p></div><div class="gallery-grid"><button v-for="(photo, index) in gallery" :key="photo.src" class="gallery-card" @click="galleryIndex = index" :aria-label="`View photo: ${photo.label}`"><div class="gallery-image"><img :src="photo.src" :alt="photo.alt" loading="lazy" /><span class="gallery-expand"><ArrowUpRight :size="22" /></span><span class="gallery-count">0{{ index + 1 }} / MOMENTS</span></div><div class="gallery-info"><h3>{{ photo.label }}</h3><p>{{ photo.caption }}</p></div></button></div><div class="gallery-foot"><span>Different conversations. One shared future.</span><span>BUSIA, TOGETHER <span class="foot-star">✳</span></span></div></div></section>
+    <section id="moments" class="moments section-space section-anchor">
+      <div class="container">
+        <div class="section-heading"><div><div class="eyebrow">03 / PEOPLE. PURPOSE. CONNECTION.</div><h2>A vision with<br /><span class="serif-word">a human face.</span></h2></div><p>Explore the photographs, discover the person,<br class="desktop-break" /> and see the connections behind the vision.</p></div>
+        <div class="gallery-toolbar"><div class="gallery-filters" role="group" aria-label="Filter campaign photographs"><button v-for="filter in galleryFilters" :key="filter" :aria-pressed="galleryFilter === filter" :class="{ active: galleryFilter === filter }" @click="filterGallery(filter)">{{ filter }}<span>{{ filter === 'All moments' ? gallery.length : gallery.filter(photo => photo.category === filter).length }}</span></button></div><span class="gallery-results" role="status">{{ filteredGallery.length }} photographs</span></div>
+        <div class="gallery-grid"><button v-for="(photo, index) in visibleGallery" :key="photo.src" class="gallery-card" @click="openPhoto(photo)" :aria-label="`View photo: ${photo.label}`"><div class="gallery-image"><img :src="photo.src" :alt="photo.alt" loading="lazy" /><span class="gallery-expand"><ArrowUpRight :size="22" /></span><span class="gallery-count">{{ photo.category.toUpperCase() }} / {{ String(index + 1).padStart(2, '0') }}</span></div><div class="gallery-info"><h3>{{ photo.label }}</h3><p>{{ photo.caption }}</p></div></button></div>
+        <div v-if="visiblePhotoCount < filteredGallery.length" class="gallery-more"><button class="button button-outline" @click="revealPhotos">More moments <Plus :size="18" /></button><span>{{ visibleGallery.length }} of {{ filteredGallery.length }} photographs</span></div>
+        <div class="gallery-foot"><span>Different conversations. One shared future.</span><span>BUSIA, TOGETHER <span class="foot-star">✳</span></span></div>
+      </div>
+    </section>
+
+    <section id="questions" class="questions section-space section-anchor"><div class="container questions-grid"><div class="questions-intro"><div class="eyebrow">04 / GET TO KNOW THE VISION</div><h2>A little more<br /><span class="serif-word">clarity.</span></h2><p>Get to know the proposed agenda and find your way into the conversation.</p><div class="questions-photo"><img src="/images/candidate-reflection.jpeg" alt="Arthur Amug Osiya in a yellow hat, with his hands clasped" loading="lazy" /><span>ARTHUR AMUG OSIYA<br /><strong>BUSIA 2027</strong></span><span class="questions-photo-star" aria-hidden="true">✳</span></div></div><div class="faq-list"><div v-for="(item, index) in questions" :key="item.question" :class="['faq-item', { open: openQuestion === index }]"><h3><button :id="`question-${index}`" :aria-expanded="openQuestion === index" :aria-controls="`answer-${index}`" @click="openQuestion = openQuestion === index ? null : index"><span class="faq-number">0{{ index + 1 }}</span><span>{{ item.question }}</span><Minus v-if="openQuestion === index" :size="19" /><Plus v-else :size="19" /></button></h3><div :id="`answer-${index}`" v-show="openQuestion === index" role="region" :aria-labelledby="`question-${index}`"><p>{{ item.answer }}</p><button v-if="index === 3" class="text-link" @click="openJoin">Prepare your interest <ArrowUpRight :size="17" /></button></div></div><div class="faq-foot"><span class="small-sun" aria-hidden="true">✳</span><p>Our strongest ideas start with<br /><strong>an open conversation.</strong></p></div></div></div></section>
 
     <section id="get-involved" class="join-section section-anchor"><div class="container join-inner"><div class="join-copy"><div class="eyebrow">THE NEXT CHAPTER NEEDS YOU</div><h2>Our home.<br />Our future.<br /><span>Our move.</span><span class="join-star">✳</span></h2><p>A stronger Busia begins with all of us.<br />Bring your ideas, your energy and your voice.</p><button class="button button-cream" @click="openJoin">Be part of the journey <ArrowUpRight :size="20" /></button></div><div class="join-art" aria-hidden="true"><div class="art-ring ring-one"></div><div class="art-ring ring-two"></div><div class="art-ring ring-three"></div><span class="art-year">20<br />27<span>BUILT TOGETHER.</span></span><span class="art-flower">✳</span><span class="art-word">BUSIA NI YETU.</span></div></div></section>
   </main>
@@ -113,5 +187,5 @@ onBeforeUnmount(() => document.removeEventListener('keydown', handleKey))
   <footer><div class="container"><div class="footer-top"><a class="brand" href="#home" aria-label="Busia 2027 home"><span class="brand-mark">b<span>✳</span></span><span class="brand-word">ARTHUR<span>AMUG OSIYA · 2027</span></span></a><p>A stronger Busia.<br />Built together.</p><nav aria-label="Footer navigation"><a href="#about">The candidate</a><a href="#vision">Our vision</a><button @click="openJoin">Get involved <ArrowUpRight :size="14" /></button></nav><a class="back-top" href="#home">Back to top <ArrowUpRight :size="18" /></a></div><div class="footer-bottom"><span>© {{ new Date().getFullYear() }} Busia 2027 · Website concept</span><span>Draft campaign priorities — subject to candidate approval.</span><span>Made for a shared future <Heart :size="12" /></span></div></div></footer>
 
   <InterestDialog v-if="joinOpen" @close="joinOpen = false" />
-  <div v-if="galleryIndex !== null" class="lightbox" role="dialog" aria-modal="true" aria-label="Campaign photo gallery" @click.self="closeGallery"><button class="lightbox-close" @click="closeGallery" aria-label="Close gallery" autofocus><X /></button><button class="lightbox-prev" @click="changePhoto(-1)" aria-label="Previous photo"><ArrowRight /></button><figure><img :src="gallery[galleryIndex].src" :alt="gallery[galleryIndex].alt" /><figcaption>{{ gallery[galleryIndex].label }} <span>{{ galleryIndex + 1 }} / {{ gallery.length }}</span></figcaption></figure><button class="lightbox-next" @click="changePhoto(1)" aria-label="Next photo"><ArrowRight /></button></div>
+  <div v-if="galleryIndex !== null" class="lightbox" role="dialog" aria-modal="true" aria-label="Campaign photo gallery" @click.self="closeGallery"><button class="lightbox-close" @click="closeGallery" aria-label="Close gallery" autofocus><X /></button><button class="lightbox-prev" @click="changePhoto(-1)" aria-label="Previous photo"><ArrowRight /></button><figure><img :src="gallery[galleryIndex].src" :alt="gallery[galleryIndex].alt" /><figcaption>{{ gallery[galleryIndex].label }} <span>{{ galleryIndex + 1 }} / {{ gallery.length }}</span></figcaption><div class="lightbox-thumbs" role="group" aria-label="Choose gallery photo"><button v-for="(photo, index) in gallery" :key="photo.src" :aria-label="`Open photo ${index + 1}: ${photo.label}`" :aria-pressed="galleryIndex === index" @click="galleryIndex = index"><img :src="photo.src" alt="" loading="lazy" /></button></div></figure><button class="lightbox-next" @click="changePhoto(1)" aria-label="Next photo"><ArrowRight /></button></div>
 </template>

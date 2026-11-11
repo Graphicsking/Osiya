@@ -5,9 +5,14 @@ import { pathToFileURL } from 'node:url'
 import { Window } from 'happy-dom'
 
 const window = new Window({ url: 'http://localhost:5173' })
+const runtimeErrors = []
+const originalConsoleError = console.error
+console.error = (...args) => runtimeErrors.push(args.map(String).join(' '))
 for (const name of ['window', 'document', 'navigator', 'HTMLElement', 'HTMLInputElement', 'SVGElement', 'Element', 'Node', 'Document', 'DocumentFragment', 'ShadowRoot', 'Event', 'KeyboardEvent', 'MouseEvent', 'CustomEvent', 'localStorage']) {
   Object.defineProperty(globalThis, name, { configurable: true, value: name === 'window' ? window : window[name] })
 }
+globalThis.requestAnimationFrame = window.requestAnimationFrame.bind(window)
+globalThis.cancelAnimationFrame = window.cancelAnimationFrame.bind(window)
 window.document.body.innerHTML = '<div id="app"></div>'
 const entry = readdirSync(new URL('../dist/assets/', import.meta.url)).find(name => name.endsWith('.js'))
 await import(pathToFileURL(new URL(`../dist/assets/${entry}`, import.meta.url).pathname).href)
@@ -44,13 +49,57 @@ test('mobile navigation closes when a section is selected', async () => {
   assert.equal(document.querySelector('.menu-toggle').getAttribute('aria-expanded'), 'false')
 })
 
+test('featured photo controls wrap, select a slide, and expose a playback control', async () => {
+  await click(document.querySelector('[aria-label="Previous featured photo"]'))
+  assert.equal(document.querySelector('[aria-label="Show featured photo 3"]').getAttribute('aria-pressed'), 'true')
+  await click(document.querySelector('[aria-label="Show featured photo 2"]'))
+  assert.equal(document.querySelector('[aria-label="Show featured photo 2"]').getAttribute('aria-pressed'), 'true')
+  await click(document.querySelector('[aria-label="Play photo slideshow"]'))
+  assert.ok(document.querySelector('[aria-label="Pause photo slideshow"]'))
+  await click(document.querySelector('[aria-label="Next featured photo"]'))
+  assert.ok(document.querySelector('[aria-label="Play photo slideshow"]'))
+  await click(document.querySelector('[aria-label="Show featured photo 1"]'))
+})
+
+test('gallery filters and show-more retain the correct photo when opened', async () => {
+  assert.equal(document.querySelectorAll('.gallery-card').length, 6)
+  await click(document.querySelector('.gallery-more button'))
+  assert.equal(document.querySelectorAll('.gallery-card').length, 9)
+  assert.equal(document.activeElement, document.querySelectorAll('.gallery-card')[6])
+  const filter = label => [...document.querySelectorAll('.gallery-filters button')].find(button => button.textContent.startsWith(label))
+  await click(filter('Community'))
+  assert.equal(document.querySelectorAll('.gallery-card').length, 3)
+  assert.equal(document.querySelector('.gallery-more'), null)
+  await click(filter('Leadership'))
+  assert.equal(document.querySelectorAll('.gallery-card').length, 6)
+  const expectedPhoto = document.querySelector('.gallery-card img').getAttribute('src')
+  await click(document.querySelector('.gallery-card'))
+  assert.equal(document.querySelector('.lightbox figure > img').getAttribute('src'), expectedPhoto)
+  await click(document.querySelectorAll('.lightbox-thumbs button')[8])
+  assert.match(document.querySelector('.lightbox figcaption').textContent, /9 \/ 9/)
+  await keyboard(document, 'Escape')
+  await click(filter('All moments'))
+})
+
+test('questions expand, collapse, and lead into the interest form', async () => {
+  assert.equal(document.getElementById('question-0').getAttribute('aria-expanded'), 'true')
+  await click(document.getElementById('question-3'))
+  assert.equal(document.getElementById('question-0').getAttribute('aria-expanded'), 'false')
+  assert.equal(document.getElementById('question-3').getAttribute('aria-expanded'), 'true')
+  await click(document.querySelector('#answer-3 button'))
+  assert.ok(document.querySelector('.interest-dialog'))
+  await keyboard(document, 'Escape')
+  await click(document.getElementById('question-3'))
+  assert.equal(document.getElementById('question-3').getAttribute('aria-expanded'), 'false')
+})
+
 test('gallery opens, wraps between photos, traps focus, and restores its trigger', async () => {
   const trigger = document.querySelector('.gallery-card')
   trigger.focus(); await click(trigger)
   assert.equal(document.activeElement.getAttribute('aria-label'), 'Close gallery')
   assert.equal(document.body.style.overflow, 'hidden')
   await keyboard(document, 'ArrowLeft')
-  assert.match(document.querySelector('.lightbox figcaption').textContent, /3 \/ 3/)
+  assert.match(document.querySelector('.lightbox figcaption').textContent, /9 \/ 9/)
   await keyboard(document.activeElement, 'Tab', { shiftKey: true })
   assert.equal(document.activeElement.getAttribute('aria-label'), 'Next photo')
   await keyboard(document, 'Escape')
@@ -82,4 +131,8 @@ test('interest form saves locally, explains delivery, restores a draft and remov
   assert.equal(document.querySelector('[role="dialog"]'), null)
 })
 
-test.after(() => window.happyDOM.abort())
+test.after(() => {
+  window.happyDOM.abort()
+  console.error = originalConsoleError
+  assert.deepEqual(runtimeErrors, [], 'Production bundle should not emit runtime errors')
+})
