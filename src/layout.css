@@ -14,11 +14,12 @@
 }
 
 .mobile-nav { padding-inline: var(--page-gutter); }
-.about-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--section-column-gap); }
+.about-grid { grid-template-columns: minmax(0, clamp(260px, 30vw, 360px)) minmax(0, 1fr); gap: clamp(24px, 3vw, 40px); }
 .about-visual { justify-self: start; margin-inline: 0; padding-right: 0; }
+.about-visual .image-note { max-width: 100%; }
 .about-copy { min-width: 0; }
 .about-copy > p,
-.about-copy > .intro-copy { max-width: none; }
+.about-copy > .intro-copy { max-width: 65ch; }
 .statement-inner { justify-content: flex-start; }
 .values-strip > .container { flex-wrap: wrap; row-gap: 10px; padding-block: 18px; }
 
