@@ -63,11 +63,10 @@ test('static hero keeps its background and its campaign call to action opens the
   assert.equal(document.querySelector('.interest-dialog'), null)
 })
 
-test('gallery filters and show-more retain the correct photo when opened', async () => {
-  assert.equal(document.querySelectorAll('.gallery-card').length, 3)
-  await click(document.querySelector('.gallery-more button'))
+test('gallery shows all photographs and filters retain the correct photo when opened', async () => {
   assert.equal(document.querySelectorAll('.gallery-card').length, 5)
-  assert.equal(document.activeElement, document.querySelectorAll('.gallery-card')[3])
+  assert.equal(document.querySelector('.gallery-more'), null)
+  assert.match(document.querySelector('.gallery-results').textContent, /5 photographs/)
   const filter = label => [...document.querySelectorAll('.gallery-filters button')].find(button => button.textContent.startsWith(label))
   await click(filter('Community'))
   assert.equal(document.querySelectorAll('.gallery-card').length, 2)
@@ -81,6 +80,7 @@ test('gallery filters and show-more retain the correct photo when opened', async
   assert.match(document.querySelector('.lightbox figcaption').textContent, /5 \/ 5/)
   await keyboard(document, 'Escape')
   await click(filter('All moments'))
+  assert.equal(document.querySelectorAll('.gallery-card').length, 5)
 })
 
 test('questions expand, collapse, and lead into the interest form', async () => {

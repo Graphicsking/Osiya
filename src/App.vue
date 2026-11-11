@@ -8,7 +8,6 @@ const joinOpen = ref(false)
 const selectedPriority = ref(0)
 const galleryIndex = ref(null)
 const galleryFilter = ref('All moments')
-const visiblePhotoCount = ref(3)
 const openQuestion = ref(0)
 const activeSection = ref('home')
 const scrollProgress = ref(0)
@@ -38,14 +37,8 @@ const gallery = [
   { src: '/images/candidate-speaking.jpeg', width: 590, height: 520, alt: 'Arthur Amug Osiya speaking into a microphone beside flags', label: 'A voice for the future', caption: 'Putting shared aspirations into words.', category: 'Leadership' },
 ]
 const filteredGallery = computed(() => galleryFilter.value === 'All moments' ? gallery : gallery.filter(photo => photo.category === galleryFilter.value))
-const visibleGallery = computed(() => filteredGallery.value.slice(0, visiblePhotoCount.value))
-function filterGallery(filter) { galleryFilter.value = filter; visiblePhotoCount.value = 3 }
+function filterGallery(filter) { galleryFilter.value = filter }
 function openPhoto(photo) { galleryIndex.value = gallery.indexOf(photo) }
-function revealPhotos() {
-  const firstNewPhoto = visiblePhotoCount.value
-  visiblePhotoCount.value += 3
-  nextTick(() => document.querySelectorAll('.gallery-card')[firstNewPhoto]?.focus())
-}
 const closeMenu = () => { menuOpen.value = false }
 const openJoin = () => { closeMenu(); joinOpen.value = true }
 const closeGallery = () => { galleryIndex.value = null }
@@ -159,8 +152,7 @@ onBeforeUnmount(() => {
       <div class="container">
         <div class="section-heading"><div><div class="eyebrow">03 / PEOPLE. PURPOSE. CONNECTION.</div><h2>A vision with<br /><span class="serif-word">a human face.</span></h2></div><p>Explore the photographs, discover the person,<br class="desktop-break" /> and see the connections behind the vision.</p></div>
         <div class="gallery-toolbar"><div class="gallery-filters" role="group" aria-label="Filter campaign photographs"><button v-for="filter in galleryFilters" :key="filter" :aria-pressed="galleryFilter === filter" :class="{ active: galleryFilter === filter }" @click="filterGallery(filter)">{{ filter }}<span>{{ filter === 'All moments' ? gallery.length : gallery.filter(photo => photo.category === filter).length }}</span></button></div><span class="gallery-results" role="status">{{ filteredGallery.length }} photographs</span></div>
-        <div class="gallery-grid"><button v-for="(photo, index) in visibleGallery" :key="photo.src" class="gallery-card" @click="openPhoto(photo)" :aria-label="`View photo: ${photo.label}`"><div class="gallery-image"><img :src="photo.src" :alt="photo.alt" :width="photo.width" :height="photo.height" :style="{ maxWidth: `${photo.width}px`, maxHeight: `${photo.height}px` }" loading="lazy" decoding="async" /><span class="gallery-expand"><ArrowUpRight :size="22" /></span><span class="gallery-count">{{ photo.category.toUpperCase() }} / {{ String(index + 1).padStart(2, '0') }}</span></div><div class="gallery-info"><h3>{{ photo.label }}</h3><p>{{ photo.caption }}</p></div></button></div>
-        <div v-if="visiblePhotoCount < filteredGallery.length" class="gallery-more"><button class="button button-outline" @click="revealPhotos">More moments <Plus :size="18" /></button><span>{{ visibleGallery.length }} of {{ filteredGallery.length }} photographs</span></div>
+        <div class="gallery-grid"><button v-for="(photo, index) in filteredGallery" :key="photo.src" class="gallery-card" @click="openPhoto(photo)" :aria-label="`View photo: ${photo.label}`"><div class="gallery-image"><img :src="photo.src" :alt="photo.alt" :width="photo.width" :height="photo.height" loading="lazy" decoding="async" /><span class="gallery-expand"><ArrowUpRight :size="22" /></span><span class="gallery-count">{{ photo.category.toUpperCase() }} / {{ String(index + 1).padStart(2, '0') }}</span></div><div class="gallery-info"><h3>{{ photo.label }}</h3><p>{{ photo.caption }}</p></div></button></div>
         <div class="gallery-foot"><span>Different conversations. One shared future.</span><span>BUSIA, TOGETHER <span class="foot-star">✳</span></span></div>
       </div>
     </section>

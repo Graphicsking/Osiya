@@ -26,7 +26,8 @@ body { font-size: 16px; }
 .join-copy > p { color: #c4cfb9; }
 .gallery-info p { color: #68705f; }
 .gallery-info h3 { font-size: 20px; line-height: 1.35; }
-.gallery-grid { row-gap: 35px; }
+.gallery-grid { display: flex; flex-wrap: wrap; gap: 35px 23px; }
+.gallery-card { flex: 1 1 calc((100% - 46px) / 3); min-width: 0; }
 .hero-image-foot { font-size: 10px; }
 .hero-photo-caption { max-width: calc(100% - 45px); }
 .photo-swap-enter-active, .photo-swap-leave-active { transition: opacity .18s ease; }
@@ -47,8 +48,6 @@ body { font-size: 16px; }
 .gallery-filters button.active { background: var(--green); border-color: var(--green); color: white; }
 .gallery-filters button:not(.active):hover { background: #e9ecdf; }
 .gallery-results { font-size: 12px; color: #777f6e; white-space: nowrap; }
-.gallery-more { display: flex; align-items: center; flex-direction: column; gap: 13px; margin: 35px 0 5px; }
-.gallery-more > span { font-size: 12px; color: #777f6e; }
 .button-outline { color: var(--green); background: transparent; gap: 50px; }
 .button-outline:hover { color: white; }
 .questions { background: #efefe6; }
@@ -106,7 +105,7 @@ body { font-size: 16px; }
   .priority-label strong { font-size: 16px; }
   .priority-label small { max-width: 210px; }
   .priority-tab { min-height: 150px; }
-  .gallery-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .gallery-card { flex-basis: calc((100% - 23px) / 2); }
   .gallery-image { height: 290px; }
   .questions-grid { gap: 35px; }
   .faq-item h3 > button { gap: 12px; font-size: 15px; }
@@ -131,7 +130,8 @@ body { font-size: 16px; }
   .gallery-filters { gap: 6px; }
   .gallery-filters button { padding: 10px 12px; font-size: 14px; gap: 7px; }
   .gallery-filters button span { font-size: 10px; }
-  .gallery-grid { grid-template-columns: 1fr; gap: 32px; }
+  .gallery-grid { gap: 32px; }
+  .gallery-card { flex-basis: 100%; }
   .gallery-image, .gallery-card:first-child .gallery-image { height: 355px; }
   .gallery-info h3 { font-size: 21px; }
   .questions-grid { grid-template-columns: 1fr; gap: 35px; }
@@ -155,7 +155,7 @@ body { font-size: 16px; }
   .reading-progress, .photo-swap-enter-active, .photo-swap-leave-active { transition: none; }
 }
 
-/* Preserve the full photograph and avoid enlarging small source files. */
+/* Preserve supporting portraits; gallery thumbnails fill their frames. */
 .hero-visual { width: 100%; max-width: 540px; justify-self: end; }
 .hero-photo-wrap { height: auto; aspect-ratio: 3 / 2; border-top-left-radius: 65px; display: flex; align-items: center; justify-content: center; background: #e5e6dd; }
 .hero-photo { width: 100%; height: 100%; object-fit: contain; object-position: center; flex-shrink: 0; }
@@ -167,8 +167,7 @@ body { font-size: 16px; }
 .about-image { height: auto; aspect-ratio: 3 / 4; max-width: 360px; border-radius: 5px 5px 60px 5px; }
 .about-image img { object-fit: contain; object-position: center; }
 .gallery-image { display: flex; align-items: center; justify-content: center; background: #e8e9e0; }
-.gallery-image img { object-fit: contain; object-position: center; width: 100%; height: 100%; }
-.gallery-card:first-child img { object-position: center; }
+.gallery-image img { object-fit: cover; object-position: center 30%; width: 100%; height: 100%; }
 .gallery-card:hover img { transform: none; }
 .questions-photo { width: 100%; max-width: 340px; height: auto; aspect-ratio: 590 / 520; }
 .questions-photo > img { object-fit: contain; object-position: center; }
