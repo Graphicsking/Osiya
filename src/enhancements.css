@@ -154,3 +154,35 @@ body { font-size: 16px; }
 @media (prefers-reduced-motion: reduce) {
   .reading-progress, .photo-swap-enter-active, .photo-swap-leave-active { transition: none; }
 }
+
+/* Preserve the full photograph and avoid enlarging small source files. */
+.hero-visual { width: 100%; max-width: 540px; justify-self: end; }
+.hero-photo-wrap { height: auto; aspect-ratio: 3 / 2; border-top-left-radius: 65px; display: flex; align-items: center; justify-content: center; background: #e5e6dd; }
+.hero-photo { width: 100%; height: 100%; object-fit: contain; object-position: center; flex-shrink: 0; }
+.hero-photo-wrap:hover .hero-photo { transform: none; }
+.hero-photo-caption { font-size: 28px; bottom: 20px; left: 24px; }
+.hero-photo-caption em { font-size: 34px; }
+.photo-label { font-size: 7px; top: 17px; right: 16px; }
+.about-visual { max-width: 410px; width: 100%; margin-inline: auto; }
+.about-image { height: auto; aspect-ratio: 3 / 4; max-width: 360px; border-radius: 5px 5px 60px 5px; }
+.about-image img { object-fit: contain; object-position: center; }
+.gallery-image { display: flex; align-items: center; justify-content: center; background: #e8e9e0; }
+.gallery-image img { object-fit: contain; object-position: center; width: 100%; height: 100%; }
+.gallery-card:first-child img { object-position: center; }
+.gallery-card:hover img { transform: none; }
+.questions-photo { width: 100%; max-width: 340px; height: auto; aspect-ratio: 590 / 520; }
+.questions-photo > img { object-fit: contain; object-position: center; }
+.lightbox figure > img { width: auto; height: auto; max-width: 100%; object-fit: contain; }
+@media (max-width: 700px) {
+  .hero-visual { max-width: 540px; justify-self: center; margin-left: 0; padding-left: 0; }
+  .hero-photo-wrap { height: auto; border-top-left-radius: 45px; }
+  .hero-photo-caption { font-size: 23px; left: 20px; bottom: 17px; }
+  .hero-photo-caption em { font-size: 28px; }
+  .photo-label { font-size: 6px; top: 13px; right: 12px; padding: 7px 9px; }
+  .orbit-stamp { width: 78px; height: 78px; left: -14px; top: 27%; }
+  .orbit-stamp > span:first-child { font-size: 6px; }
+  .orbit-stamp .stamp-sun { font-size: 29px; line-height: 31px; }
+  .orbit-stamp > span:last-child { font-size: 4.5px; }
+  .about-image { height: auto; }
+  .questions-photo { height: auto; }
+}
