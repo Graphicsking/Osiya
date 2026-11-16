@@ -3,6 +3,8 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { ArrowUpRight, ArrowRight, ArrowDown, Menu, X, Plus, Minus, Sprout, Stethoscope, GraduationCap, BriefcaseBusiness, Check, MapPin } from '@lucide/vue'
 import InterestDialog from './components/InterestDialog.vue'
 
+const imageUrl = filename => `${import.meta.env.VITE_SITE_BASE_PATH || '/'}images/${filename}`
+
 const menuOpen = ref(false)
 const joinOpen = ref(false)
 const selectedPriority = ref(0)
@@ -30,12 +32,12 @@ function movePriority(index, direction) {
   nextTick(() => document.getElementById(`priority-tab-${selectedPriority.value}`)?.focus())
 }
 const gallery = [
-  { src: '/images/candidate-community.jpeg', width: 480, height: 640, alt: 'Arthur Amug Osiya smiling while holding a microphone at a gathering', label: 'People at the heart', caption: 'A campaign vision rooted in connection.', category: 'Community' },
-  { src: '/images/candidate-address.jpeg', width: 679, height: 452, alt: 'Arthur Amug Osiya delivering an outdoor address', label: 'A shared direction', caption: 'Space for ideas. A voice for everyone.', category: 'Community' },
-  { src: '/images/candidate-conversation.jpeg', width: 606, height: 506, alt: 'Arthur Amug Osiya speaking during a seated discussion', label: 'Ideas into possibility', caption: 'A conversation about the future.', category: 'Leadership' },
-  { src: '/images/candidate-leadership.webp', width: 960, height: 640, alt: 'Arthur Amug Osiya addressing an indoor gathering from a lectern', label: 'Purpose in every conversation', caption: 'The person behind the proposed vision.', category: 'Leadership' },
-  { src: '/images/candidate-speaking.jpeg', width: 590, height: 520, alt: 'Arthur Amug Osiya speaking into a microphone beside flags', label: 'A voice for the future', caption: 'Putting shared aspirations into words.', category: 'Leadership' },
-  { src: '/images/candidate-gathering.jpeg', width: 365, height: 547, alt: 'Arthur Amug Osiya speaking at a gathering in a red sweater', label: 'Together in conversation', caption: 'Making time to connect.', category: 'Community' },
+  { src: imageUrl('candidate-community.jpeg'), width: 480, height: 640, alt: 'Arthur Amug Osiya smiling while holding a microphone at a gathering', label: 'People at the heart', caption: 'A campaign vision rooted in connection.', category: 'Community' },
+  { src: imageUrl('candidate-address.jpeg'), width: 679, height: 452, alt: 'Arthur Amug Osiya delivering an outdoor address', label: 'A shared direction', caption: 'Space for ideas. A voice for everyone.', category: 'Community' },
+  { src: imageUrl('candidate-conversation.jpeg'), width: 606, height: 506, alt: 'Arthur Amug Osiya speaking during a seated discussion', label: 'Ideas into possibility', caption: 'A conversation about the future.', category: 'Leadership' },
+  { src: imageUrl('candidate-leadership.webp'), width: 960, height: 640, alt: 'Arthur Amug Osiya addressing an indoor gathering from a lectern', label: 'Purpose in every conversation', caption: 'The person behind the proposed vision.', category: 'Leadership' },
+  { src: imageUrl('candidate-speaking.jpeg'), width: 590, height: 520, alt: 'Arthur Amug Osiya speaking into a microphone beside flags', label: 'A voice for the future', caption: 'Putting shared aspirations into words.', category: 'Leadership' },
+  { src: imageUrl('candidate-gathering.jpeg'), width: 365, height: 547, alt: 'Arthur Amug Osiya speaking at a gathering in a red sweater', label: 'Together in conversation', caption: 'Making time to connect.', category: 'Community' },
 ]
 const photosForFilter = filter => filter === 'All moments' ? gallery : gallery.filter(photo => photo.category === filter)
 const filteredGallery = computed(() => photosForFilter(galleryFilter.value))
@@ -108,7 +110,7 @@ onBeforeUnmount(() => {
 
   <main id="main">
     <section id="home" class="hero hero-expedition section-anchor" aria-labelledby="hero-title">
-      <div class="campaign-backdrop"><img class="campaign-scene" src="/images/candidate-leadership.webp" alt="Arthur Amug Osiya addressing an indoor gathering from a lectern" width="960" height="640" fetchpriority="high" decoding="async" /></div>
+      <div class="campaign-backdrop"><img class="campaign-scene" :src="imageUrl('candidate-leadership.webp')" alt="Arthur Amug Osiya addressing an indoor gathering from a lectern" width="960" height="640" fetchpriority="high" decoding="async" /></div>
       <div class="campaign-shade" aria-hidden="true"></div>
       <div class="campaign-glow" aria-hidden="true"></div>
       <div class="container campaign-hero-content">
@@ -125,7 +127,7 @@ onBeforeUnmount(() => {
 
     <section id="about" class="about section-anchor section-space">
       <div class="container about-grid">
-        <div class="about-visual"><div class="about-image"><img src="/images/candidate-community.jpeg" width="480" height="640" alt="Arthur Amug Osiya smiling at a community gathering" loading="lazy" decoding="async" /></div><div class="image-note"><span class="note-star">✳</span><span>A shared home.<br /><strong>A shared responsibility.</strong></span></div><span class="vertical-label">THE PEOPLE ARE THE PURPOSE</span></div>
+        <div class="about-visual"><div class="about-image"><img :src="imageUrl('candidate-community.jpeg')" width="480" height="640" alt="Arthur Amug Osiya smiling at a community gathering" loading="lazy" decoding="async" /></div><div class="image-note"><span class="note-star">✳</span><span>A shared home.<br /><strong>A shared responsibility.</strong></span></div><span class="vertical-label">THE PEOPLE ARE THE PURPOSE</span></div>
         <div class="about-copy"><div class="eyebrow">01 / MEET ARTHUR AMUG OSIYA</div><h2>Arthur Amug Osiya.<br /><span class="serif-word">A shared vision.</span></h2><p class="intro-copy">Because a better future begins with the people who call Busia home.</p><p>From the farmer and the small business owner to the student imagining what comes next, every voice deserves a place in the conversation.</p><p>This is a vision built around everyday aspirations: a dignified livelihood, care when it matters, and opportunity that reaches further.</p><a class="text-link underlined" href="#vision">Discover the priorities <ArrowUpRight :size="19" /></a><div class="about-signoff"><span class="handwritten">For our home. For our future.</span><span>ARTHUR AMUG OSIYA · BUSIA 2027</span></div></div>
       </div>
     </section>
@@ -159,7 +161,7 @@ onBeforeUnmount(() => {
       </div>
     </section>
 
-    <section id="questions" class="questions section-space section-anchor"><div class="container questions-grid"><div class="questions-intro"><div class="eyebrow">04 / GET TO KNOW THE VISION</div><h2>A little more<br /><span class="serif-word">clarity.</span></h2><p>Get to know the proposed agenda and find your way into the conversation.</p><div class="questions-photo"><img src="/images/candidate-speaking.jpeg" width="590" height="520" alt="Arthur Amug Osiya speaking into a microphone beside flags" loading="lazy" decoding="async" /><span>ARTHUR AMUG OSIYA<br /><strong>BUSIA 2027</strong></span><span class="questions-photo-star" aria-hidden="true">✳</span></div></div><div class="faq-list"><div v-for="(item, index) in questions" :key="item.question" :class="['faq-item', { open: openQuestion === index }]"><h3><button :id="`question-${index}`" :aria-expanded="openQuestion === index" :aria-controls="`answer-${index}`" @click="openQuestion = openQuestion === index ? null : index"><span class="faq-number">0{{ index + 1 }}</span><span>{{ item.question }}</span><Minus v-if="openQuestion === index" :size="19" /><Plus v-else :size="19" /></button></h3><div :id="`answer-${index}`" v-show="openQuestion === index" role="region" :aria-labelledby="`question-${index}`"><p>{{ item.answer }}</p><button v-if="index === 3" class="text-link" @click="openJoin">Get involved <ArrowUpRight :size="17" /></button></div></div><div class="faq-foot"><span class="small-sun" aria-hidden="true">✳</span><p>Our strongest ideas start with<br /><strong>an open conversation.</strong></p></div></div></div></section>
+    <section id="questions" class="questions section-space section-anchor"><div class="container questions-grid"><div class="questions-intro"><div class="eyebrow">04 / GET TO KNOW THE VISION</div><h2>A little more<br /><span class="serif-word">clarity.</span></h2><p>Get to know the proposed agenda and find your way into the conversation.</p><div class="questions-photo"><img :src="imageUrl('candidate-speaking.jpeg')" width="590" height="520" alt="Arthur Amug Osiya speaking into a microphone beside flags" loading="lazy" decoding="async" /><span>ARTHUR AMUG OSIYA<br /><strong>BUSIA 2027</strong></span><span class="questions-photo-star" aria-hidden="true">✳</span></div></div><div class="faq-list"><div v-for="(item, index) in questions" :key="item.question" :class="['faq-item', { open: openQuestion === index }]"><h3><button :id="`question-${index}`" :aria-expanded="openQuestion === index" :aria-controls="`answer-${index}`" @click="openQuestion = openQuestion === index ? null : index"><span class="faq-number">0{{ index + 1 }}</span><span>{{ item.question }}</span><Minus v-if="openQuestion === index" :size="19" /><Plus v-else :size="19" /></button></h3><div :id="`answer-${index}`" v-show="openQuestion === index" role="region" :aria-labelledby="`question-${index}`"><p>{{ item.answer }}</p><button v-if="index === 3" class="text-link" @click="openJoin">Get involved <ArrowUpRight :size="17" /></button></div></div><div class="faq-foot"><span class="small-sun" aria-hidden="true">✳</span><p>Our strongest ideas start with<br /><strong>an open conversation.</strong></p></div></div></div></section>
 
     <section id="get-involved" class="join-section section-anchor"><div class="container join-inner"><div class="join-copy"><div class="eyebrow">THE NEXT CHAPTER NEEDS YOU</div><h2>Our home.<br />Our future.<br /><span>Our move.</span><span class="join-star">✳</span></h2><p>A stronger Busia begins with all of us.<br />Bring your ideas, your energy and your voice.</p><button class="button button-cream" @click="openJoin">Be part of the journey</button></div><div class="join-art" aria-hidden="true"><div class="art-ring ring-one"></div><div class="art-ring ring-two"></div><div class="art-ring ring-three"></div><span class="art-year">20<br />27<span>BUILT TOGETHER.</span></span><span class="art-flower">✳</span><span class="art-word">BUSIA NI YETU.</span></div></div></section>
   </main>
