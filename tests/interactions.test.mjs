@@ -14,18 +14,18 @@ for (const name of ['window', 'document', 'navigator', 'HTMLElement', 'HTMLInput
 globalThis.requestAnimationFrame = window.requestAnimationFrame.bind(window)
 globalThis.cancelAnimationFrame = window.cancelAnimationFrame.bind(window)
 window.document.body.innerHTML = '<div id="app"></div>'
-const entry = readdirSync(new URL('../dist/assets/', import.meta.url)).find(name => name.endsWith('.js'))
-await import(pathToFileURL(new URL(`../dist/assets/${entry}`, import.meta.url).pathname).href)
+const entry = readdirSync(new URL('../public/build/assets/', import.meta.url)).find(name => name.endsWith('.js'))
+await import(pathToFileURL(new URL(`../public/build/assets/${entry}`, import.meta.url).pathname).href)
 const settle = () => new Promise(resolve => setTimeout(resolve, 0))
 const click = async element => { assert.ok(element, 'Expected control to exist'); element.click(); await settle() }
 const keyboard = async (target, key, options = {}) => { target.dispatchEvent(new window.KeyboardEvent('keydown', { key, bubbles: true, cancelable: true, ...options })); await settle() }
 
 test('campaign identity, assets and navigation render in the production bundle', () => {
-  assert.match(document.title || readFileSync(new URL('../dist/index.html', import.meta.url), 'utf8'), /Arthur Amug Osiya/)
+  assert.match(document.title || readFileSync(new URL('../resources/views/app.blade.php', import.meta.url), 'utf8'), /Arthur Amug Osiya/)
   assert.match(document.querySelector('.hero .eyebrow').textContent, /ARTHUR AMUG OSIYA/)
   for (const image of document.querySelectorAll('img')) {
     assert.ok(image.alt.trim())
-    assert.ok(existsSync(new URL(`../dist${image.getAttribute('src')}`, import.meta.url)), `Image exists: ${image.src}`)
+    assert.ok(existsSync(new URL(`../public${image.getAttribute('src')}`, import.meta.url)), `Image exists: ${image.src}`)
   }
   for (const anchor of document.querySelectorAll('a[href^="#"]')) assert.ok(document.querySelector(anchor.getAttribute('href')), `Target exists: ${anchor.hash}`)
 })
@@ -63,24 +63,33 @@ test('static hero keeps its background and its campaign call to action opens the
   assert.equal(document.querySelector('.interest-dialog'), null)
 })
 
-test('gallery shows all photographs and filters retain the correct photo when opened', async () => {
-  assert.equal(document.querySelectorAll('.gallery-card').length, 5)
+test('gallery shows six moments split into three community and three leadership photos', async () => {
+  assert.equal(document.querySelectorAll('.gallery-card').length, 6)
   assert.equal(document.querySelector('.gallery-more'), null)
-  assert.match(document.querySelector('.gallery-results').textContent, /5 photographs/)
+  assert.match(document.querySelector('.gallery-results').textContent, /6 photographs/)
   const filter = label => [...document.querySelectorAll('.gallery-filters button')].find(button => button.textContent.startsWith(label))
+  assert.deepEqual([...document.querySelectorAll('.gallery-filters button span')].map(span => span.textContent), ['6', '3', '3'])
+  const allSources = [...document.querySelectorAll('.gallery-card img')].map(image => image.getAttribute('src'))
   await click(filter('Community'))
-  assert.equal(document.querySelectorAll('.gallery-card').length, 2)
+  assert.equal(document.querySelectorAll('.gallery-card').length, 3)
+  assert.match(document.querySelector('.gallery-results').textContent, /3 photographs/)
+  const communitySources = [...document.querySelectorAll('.gallery-card img')].map(image => image.getAttribute('src'))
   assert.equal(document.querySelector('.gallery-more'), null)
   await click(filter('Leadership'))
   assert.equal(document.querySelectorAll('.gallery-card').length, 3)
+  assert.match(document.querySelector('.gallery-results').textContent, /3 photographs/)
   const expectedPhoto = document.querySelector('.gallery-card img').getAttribute('src')
   await click(document.querySelector('.gallery-card'))
   assert.equal(document.querySelector('.lightbox figure > img').getAttribute('src'), expectedPhoto)
-  await click(document.querySelectorAll('.lightbox-thumbs button')[4])
-  assert.match(document.querySelector('.lightbox figcaption').textContent, /5 \/ 5/)
+  assert.equal(document.querySelectorAll('.lightbox-thumbs button').length, 3)
+  const leadershipSources = [...document.querySelectorAll('.gallery-card img')].map(image => image.getAttribute('src'))
+  assert.deepEqual([...document.querySelectorAll('.lightbox-thumbs img')].map(image => image.getAttribute('src')), leadershipSources)
+  assert.deepEqual([...communitySources, ...leadershipSources].sort(), [...allSources].sort())
+  await click(document.querySelectorAll('.lightbox-thumbs button')[2])
+  assert.match(document.querySelector('.lightbox figcaption').textContent, /3 \/ 3/)
   await keyboard(document, 'Escape')
   await click(filter('All moments'))
-  assert.equal(document.querySelectorAll('.gallery-card').length, 5)
+  assert.equal(document.querySelectorAll('.gallery-card').length, 6)
 })
 
 test('questions expand, collapse, and lead into the interest form', async () => {
@@ -101,7 +110,7 @@ test('gallery opens, wraps between photos, traps focus, and restores its trigger
   assert.equal(document.activeElement.getAttribute('aria-label'), 'Close gallery')
   assert.equal(document.body.style.overflow, 'hidden')
   await keyboard(document, 'ArrowLeft')
-  assert.match(document.querySelector('.lightbox figcaption').textContent, /5 \/ 5/)
+  assert.match(document.querySelector('.lightbox figcaption').textContent, /6 \/ 6/)
   await keyboard(document.activeElement, 'Tab', { shiftKey: true })
   assert.equal(document.activeElement.getAttribute('aria-label'), 'Next photo')
   await keyboard(document, 'Escape')
@@ -110,27 +119,51 @@ test('gallery opens, wraps between photos, traps focus, and restores its trigger
   assert.equal(document.body.style.overflow, '')
 })
 
-test('interest form saves locally, explains delivery, restores a draft and removes it', async () => {
+test('interest form submits to Laravel, preserves details on failure and confirms only after saving', async () => {
   const trigger = document.querySelector('.nav-cta')
   trigger.focus(); await click(trigger)
   assert.equal(document.activeElement.name, 'name')
   const enter = (selector, value) => { const input = document.querySelector(selector); input.value = value; input.dispatchEvent(new window.Event('input', { bubbles: true })) }
+  assert.equal(document.querySelector('input[name="email"]'), null)
+  assert.equal(document.querySelector('input[name="phone"]').type, 'tel')
+  assert.equal(document.querySelector('.interest-dialog button[type="submit"]').textContent, 'Submit')
   enter('input[name="name"]', 'Demo Visitor')
-  enter('input[name="email"]', 'demo@example.com')
+  enter('input[name="phone"]', '0712 345 678')
   await click(document.querySelector('input[type="checkbox"]'))
-  document.querySelector('.interest-dialog form').dispatchEvent(new window.Event('submit', { bubbles: true, cancelable: true }))
-  await settle()
-  assert.match(document.querySelector('#interest-privacy').textContent, /campaign has not received it/)
-  assert.equal(JSON.parse(localStorage.getItem('busia2027-interest-draft')).name, 'Demo Visitor')
-  await keyboard(document, 'Escape')
-  assert.equal(document.activeElement, trigger)
-  await click(trigger)
-  assert.equal(document.querySelector('input[name="name"]').value, 'Demo Visitor')
-  await click(document.querySelector('.clear-draft'))
-  assert.equal(localStorage.getItem('busia2027-interest-draft'), null)
-  assert.equal(document.querySelector('input[name="email"]').value, '')
-  await keyboard(document, 'Escape')
-  assert.equal(document.querySelector('[role="dialog"]'), null)
+  const originalFetch = globalThis.fetch
+  const requests = []
+  let succeed = false
+  let finishRequest
+  globalThis.fetch = async (url, options) => {
+    requests.push({ url, options })
+    if (url === '/api/csrf') return { ok: true, json: async () => ({ token: 'test-csrf-token' }) }
+    if (!succeed) return { ok: false, status: 503, json: async () => ({}) }
+    return new Promise(resolve => { finishRequest = () => resolve({ ok: true, status: 201, json: async () => ({ message: 'Received' }) }) })
+  }
+  try {
+    const submit = () => document.querySelector('.interest-dialog form').dispatchEvent(new window.Event('submit', { bubbles: true, cancelable: true }))
+    submit(); await settle()
+    assert.match(document.querySelector('.form-error').textContent, /could not save/)
+    assert.equal(document.querySelector('input[name="phone"]').value, '0712 345 678')
+    assert.equal(document.querySelector('.success-mark'), null)
+    const failedPayload = JSON.parse(requests.find(request => request.url === '/api/interests').options.body)
+    succeed = true
+    submit(); await settle()
+    assert.equal(document.querySelector('.form-submit').disabled, true)
+    assert.equal(document.querySelector('.form-submit').textContent, 'Submitting…')
+    submit(); await settle()
+    assert.equal(requests.filter(request => request.url === '/api/interests').length, 2)
+    const request = requests.at(-1)
+    assert.equal(request.options.headers['X-CSRF-TOKEN'], 'test-csrf-token')
+    assert.equal(request.options.credentials, 'same-origin')
+    assert.deepEqual(JSON.parse(request.options.body), { submission_id: failedPayload.submission_id, name: 'Demo Visitor', phone: '0712 345 678', interest: 'Volunteer', consent: true })
+    finishRequest(); await settle()
+    assert.match(document.querySelector('#interest-privacy').textContent, /received by the campaign team/)
+    assert.ok(document.querySelector('.success-mark'))
+    assert.equal(localStorage.getItem('busia2027-interest-draft'), null)
+    await keyboard(document, 'Escape')
+    assert.equal(document.activeElement, trigger)
+  } finally { globalThis.fetch = originalFetch }
 })
 
 test.after(() => {

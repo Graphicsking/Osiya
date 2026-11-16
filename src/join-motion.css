@@ -1,0 +1,43 @@
+/* Native CSS motion for the closing section; no animation library required. */
+.join-art .art-year {
+  animation: join-year-float 8s ease-in-out infinite;
+}
+
+.join-art .art-ring {
+  animation: join-ring-orbit 90s linear infinite reverse;
+}
+
+/* A faint marker makes rotation perceptible on otherwise uniform circles. */
+.join-art .art-ring::after {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: calc(50% - 2px);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #d4ddbc70;
+}
+
+.join-art .ring-one { animation-delay: -15s; }
+.join-art .ring-two { animation-duration: 120s; animation-delay: -65s; }
+.join-art .ring-three {
+  animation-duration: 150s;
+  animation-delay: -40s;
+  animation-direction: normal;
+}
+
+@keyframes join-year-float {
+  0%, 100% { transform: translateY(7px) rotate(-8deg); }
+  50% { transform: translateY(-7px) rotate(-8deg); }
+}
+
+@keyframes join-ring-orbit {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .join-art .art-year,
+  .join-art .art-ring { animation: none; }
+}

@@ -2,3 +2,13 @@ node_modules/
 dist/
 .DS_Store
 .openai/*.local.*
+
+/vendor/
+/.env
+/.env.*
+!/.env.example
+/public/build/
+/public/hot
+/database/*.sqlite*
+.phpunit.result.cache
+.phpunit.cache/
