@@ -1,6 +1,7 @@
 <script setup>
 import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { X, Check } from '@lucide/vue'
+import StarMark from './StarMark.vue'
 
 const emit = defineEmits(['close'])
 const dialog = ref(null)
@@ -80,7 +81,7 @@ onBeforeUnmount(() => {
     <div class="modal-backdrop" @click.self="emit('close')">
       <section ref="dialog" class="interest-dialog" role="dialog" aria-modal="true" aria-labelledby="interest-title" aria-describedby="interest-privacy">
         <button class="dialog-close" aria-label="Close interest form" @click="emit('close')"><X :size="22" /></button>
-        <span class="dialog-star">✳</span>
+        <span class="dialog-star"><StarMark /></span>
         <div class="eyebrow">A SHARED FUTURE STARTS HERE</div>
         <template v-if="!saved">
           <h2 id="interest-title">Bring your voice.<br /><span class="serif-word">Be part of it.</span></h2>
